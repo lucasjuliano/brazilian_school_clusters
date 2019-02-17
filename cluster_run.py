@@ -7,13 +7,10 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import MinMaxScaler
 import seaborn as sns
 import matplotlib.pyplot as plt
-from cluster import *
+from cluster import cluster
 
 #Numero de Clusters
-num_clusters = 4
-
-#Dimensões a serem consideradas durante clustering
-dimensions = ['IN_LABORATORIO_INFORMATICA','IN_LABORATORIO_CIENCIAS','IN_QUADRA_ESPORTES_COBERTA','IN_QUADRA_ESPORTES_DESCOBERTA','IN_BIBLIOTECA','IN_INTERNET','IN_ALIMENTACAO']
+num_clusters = 3
 
 # Constantes de interpretação
 pos_lim = 0.80
@@ -44,16 +41,27 @@ def percentagearray(array):
 
 def print_results_by(message,row):
     # Função para qual a distribuição dos clusters comparando com algum critério - regiao, publico/privado, rural/urbano
+    # Também salva os valores em um dataframe e depois em um .csv
     print("-----",message,":")
     print("\n")
+    df = pd.DataFrame()
+
     for item in np.unique(np.array(data_schools[row].values)):
         # Filtrando para uma regiao específico
         data_re = data_schools[data_schools[row] == item]
-        print(item, percentagearray(data_re['cluster_label']))
+        percentage_by_criteria = percentagearray(data_re['cluster_label'])
+        print(item, percentage_by_criteria)
         print("\n")
 
-# Manda número de clusters e recebe os dados do fit e o pandas
-data_schools,kmeans = cluster(num_clusters)
+        #Cada vez que roda, adiciona o dicionário ao dataframe
+        percentage_by_criteria['Nome'] = item
+        df = df.append(percentage_by_criteria, ignore_index=True)
+
+    # Salvando os valores desse DataFrame
+    df.to_csv(row + '_values.csv')
+
+# Manda número de clusters e recebe os dados do fit e o dataframe
+data_schools,kmeans,dimensions = cluster(num_clusters)
 
 
 # Dispersão geral entre os clusters
@@ -65,7 +73,7 @@ print('Descrição dos perfis')
 
 # Pega valores de centroides
 centroides = np.around(kmeans.cluster_centers_,decimals=2)
-# print(values)
+#print(centroides)
 
 print('Quantas escolas estão sendo consideradas nesse (rows,cols):',data_schools.shape)
 
@@ -74,6 +82,7 @@ for i in range(0, num_clusters):
     print("Cluster ",i)
     for d in range(0,len(dimensions)):
         print(dimensions[d],'-',interpreter(centroides[i][d]))
+        #print(dimensions[d],'-',centroides[i][d])
     print("--")
 
 print("***************************************************************")
@@ -82,10 +91,10 @@ print("***************************************************************")
 print_results_by('Por tipo de escola','TP_DEPENDENCIA')
 
 # Mostrar por regiões do brasil
-print_results_by('Por regiões','Re')
+print_results_by('Por regiões','CO_REGIAO')
 
 # Mostrar por rural ou urbano
-print_results_by('Por rural (0) e urbano (1)','IN_URBANO')
+print_results_by('Por rural (0) e urbano (1)','TP_LOCALIZACAO')
 
 # Porcentagem total de valores vazios
 # print(data_schools['IN_ALIMENTACAO'].notnull().mean())

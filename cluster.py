@@ -8,7 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-#Função recebe número de clusters e retorna um pandas com os dados tagueados de acordo com o cluster e valores dos centroides
+#Função recebe número de clusters e retorna um dataframe com os dados tagueados de acordo com o cluster e valores dos centroides
 def cluster(num_clusters):
 
     # Dicionário de codigos de UFs
@@ -50,11 +50,31 @@ def cluster(num_clusters):
                 4 : "Privada"
     }
 
+    #Dicionário regiões
+    co_reg = {
+            1 : "Norte",
+            2 : "Nordeste",
+            3 : "Sudeste",
+            4 : "Sul",
+            5 : "Centro-oeste",
+    }
+
     #Dimensões a serem consideradas durante clustering
-    dimensions = ['IN_LABORATORIO_INFORMATICA','IN_LABORATORIO_CIENCIAS','IN_QUADRA_ESPORTES_COBERTA','IN_QUADRA_ESPORTES_DESCOBERTA','IN_BIBLIOTECA','IN_INTERNET','IN_ALIMENTACAO']
+    clustered_dimensions = ['IN_LABORATORIO_INFORMATICA','IN_LABORATORIO_CIENCIAS','IN_QUADRA_ESPORTES_COBERTA','IN_QUADRA_ESPORTES_DESCOBERTA','IN_BIBLIOTECA','IN_INTERNET','IN_BANDA_LARGA','IN_ALIMENTACAO']
+    #clustered_dimensions = ['IN_LABORATORIO_INFORMATICA','NU_COMP_ALUNO','NU_FUNCIONARIOS']
+    #clustered_dimensions = ['NU_COMP_ALUNO']
+
+    #Dimensões a serem ignoradas durante o clustering (principais)
+    ignored_clusters = ['TP_DEPENDENCIA','CO_REGIAO','TP_LOCALIZACAO','TP_SITUACAO_FUNCIONAMENTO']
+
+    #Junção de todas as dimensões
+    all_dimensions = ignored_clusters + clustered_dimensions
 
     # Puxar CSV
     data_schools = pd.read_csv("cluster_data.csv",sep=',')
+
+    #Filtrar apenas por dimensões que serão usadas
+    data_schools = data_schools[all_dimensions]
 
     # Retirar escolas que não estão em funcionamento
     data_schools = data_schools[data_schools['TP_SITUACAO_FUNCIONAMENTO'] == 1]
@@ -62,15 +82,15 @@ def cluster(num_clusters):
     # Retirar linhas com NaN
     data_schools = data_schools.dropna()
 
-    # Colocar nome dos estados
-    data_schools['Re'] = data_schools['CO_UF'].map(co_ufs)
+    # Colocar nome das regiões
+    data_schools['CO_REGIAO'] = data_schools['CO_REGIAO'].map(co_reg)
 
-    # Transformar categorias 1 e 2 do IN_LOCALIZACAO
+    # Transformar categorias 1 e 2 do TP_LOCALIZACAO
     f = lambda x: 0 if x==2 else 1
-    data_schools['IN_URBANO'] = data_schools['IN_URBANO'].map(f)
+    data_schools['TP_LOCALIZACAO'] = data_schools['TP_LOCALIZACAO'].map(f)
 
-    # Transformar pandas em arrays
-    data = data_schools[dimensions].iloc[:,0:len(dimensions)].values
+    # Transformar dataframe em arrays
+    data = data_schools[clustered_dimensions].iloc[:,0:len(clustered_dimensions)].values
 
     #Normalizar os dados
     scaler = MinMaxScaler()
@@ -83,4 +103,7 @@ def cluster(num_clusters):
     #Adicionando labels ao conjunto original
     data_schools['cluster_label'] = pd.Series(kmeans.labels_).values
 
-    return data_schools,kmeans
+    return data_schools,kmeans,clustered_dimensions
+
+# df,km,dim = cluster(7)
+# print(df.head())
