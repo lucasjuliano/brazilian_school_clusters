@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from cluster import cluster
 
 #Numero de Clusters
-num_clusters = 3
+num_clusters = 5
 
 # Constantes de interpretação
 pos_lim = 0.80
