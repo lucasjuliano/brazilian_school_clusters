@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from cluster import cluster
 
 #Numero de Clusters
-num_clusters = 5
+num_clusters = 3
 
 # Constantes de interpretação
 pos_lim = 0.80
@@ -77,9 +77,16 @@ centroides = np.around(kmeans.cluster_centers_,decimals=2)
 
 print('Quantas escolas estão sendo consideradas nesse (rows,cols):',data_schools.shape)
 
+# Dataframe dos centroids
+# Adicionar cluster ao dataframe dos centroids_df
+centroids_df = pd.DataFrame(centroides,columns = dimensions)
+centroids_df.to_csv("centroids_values.csv")
+
+
 # Roda por cada cluster para mostrar o valor das dimensoes deles
 for i in range(0, num_clusters):
     print("Cluster ",i)
+
     for d in range(0,len(dimensions)):
         print(dimensions[d],'-',interpreter(centroides[i][d]))
         #print(dimensions[d],'-',centroides[i][d])

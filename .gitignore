@@ -1,2 +1,5 @@
 
 __pycache__/cluster.cpython-37.pyc
+cluster_data.csv
+*.csv
+*.csv
