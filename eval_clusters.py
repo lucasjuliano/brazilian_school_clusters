@@ -14,34 +14,30 @@ import csv
 print('Clusters - Erro')
 
 #Dicionário dos resultados
-dict_results = {
-                    "Clusters" : "Erro"
-                }
+df_results = pd.DataFrame(data=None,columns=["Erro","Improvement"])
 
 #Setando erro passado
 past_error = 0
 
-for i in range(1, 9):
+for i in range(1, 4):
 
     #Inicializando o algoritmo de Kmeans
     data_schools,kmeans,dimensions = cluster(i)
+    abs_error = np.round(kmeans.inertia_,decimals=0)
 
     #Mostrando erro quadrado
     if(past_error == 0):
-        print(i,np.round(kmeans.inertia_,decimals=0),past_error)
+        print(i,abs_error,past_error)
     else:
         #Porcentagem do erro é calculada
         past_error = np.round((1 - kmeans.inertia_/past_error)*100,decimals=0)
-        print(i,np.round(kmeans.inertia_,decimals=0),past_error)
-
+        print(i,abs_error,past_error)
 
     #Adiciona ao Dicionário
-    dict_results[i] = past_error
+    df_results.loc[i]=[abs_error,past_error]
 
     #Valor do último erro é colocado aqui
     past_error = np.round(kmeans.inertia_,decimals=0)
 
 #Salva como csv
-with open('cluster_evaluations.csv','w') as f:
-    w = csv.writer(f)
-    w.writerows(dict_results.items())
+df_results.to_csv('cluster_evaluations.csv')
